@@ -229,6 +229,29 @@ speedSlider.addEventListener("input", (e) => {
   speedValue.textContent = e.target.value + "%";
 });
 
+newLessonBtn.addEventListener("click", () => {
+
+  // 日本語欄を初期化
+  jpTextArea.value = "";
+
+  // 英語3レベルを初期化
+  enTextJunior3.value = "";
+  enTextSenior.value = "";
+  enTextNative.value = "";
+
+  // チェックボックスも初期化
+  chkJunior3.checked = false;
+  chkSenior.checked = false;
+  chkNative.checked = false;
+
+  // 自前リストを完全に消す
+  savedList.innerHTML = "";
+  savedList.style.display = "none";   // ★ これが重要！
+
+  setStatus("新しい学習を開始しました（すべて初期化）");
+});
+
+
 // ===== ユーティリティ =====
 function setStatus(msg) {
   statusDiv.textContent = msg;

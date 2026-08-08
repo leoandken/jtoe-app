@@ -1,8 +1,3 @@
-// ===== Google Apps Script 翻訳API =====
-//const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzcPiQA1tdLoGWZ0qJuR1JleYm-UyZdviLEroiEMKIAP1ItpAp7ZnO6fxD83kmf4FmSwQ/exec";
-
-//const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzRLgbXBjmNiEvjhwXv4vGc64legBEZE93NEFDEVL-KQ8cZIyqNXoI9CIWFAaP9KI3IaQ/exec";
-
 // ===============================
 // DOM取得
 // ===============================
@@ -31,7 +26,7 @@ const applySavedBtn = document.getElementById("applySavedBtn");  // ★ 追加
 const statusBox = document.getElementById("status");  // ★ 修正
 
 // GAS API URL
-const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzRLgbXBjmNiEvjhwXv4vGc64legBEZE93NEFDEVL-KQ8cZIyqNXoI9CIWFAaP9KI3IaQ/exec";
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxGqaEEaB6eIkqu5fyoKv4PfmA9N52S0O2gWRC2-_b_e6VyG6UsP_HP8LYYEJdijPIOhQ/exec.";
 
 // ===============================
 // 状態表示

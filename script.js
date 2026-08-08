@@ -6,7 +6,7 @@
 // ===============================
 // DOM取得
 // ===============================
-const jpTextArea = document.getElementById("jpTextArea");
+const jpText = document.getElementById("jpText");   // ★ 修正
 const enTextJunior3 = document.getElementById("enTextJunior3");
 const enTextSenior = document.getElementById("enTextSenior");
 const enTextNative = document.getElementById("enTextNative");
@@ -26,8 +26,9 @@ const speakBtn = document.getElementById("speakBtn");
 const saveBtn = document.getElementById("saveBtn");
 const loadBtn = document.getElementById("loadBtn");
 const newLessonBtn = document.getElementById("newLessonBtn");
+const applySavedBtn = document.getElementById("applySavedBtn");  // ★ 追加
 
-const statusBox = document.getElementById("statusBox");
+const statusBox = document.getElementById("status");  // ★ 修正
 
 // GAS API URL
 const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzRLgbXBjmNiEvjhwXv4vGc64legBEZE93NEFDEVL-KQ8cZIyqNXoI9CIWFAaP9KI3IaQ/exec";
@@ -67,7 +68,7 @@ async function fetchExplanation(level, text) {
 // 翻訳ボタン
 // ===============================
 translateBtn.addEventListener("click", async () => {
-  const jp = jpTextArea.value.trim();
+  const jp = jpText.value.trim();   // ★ 修正
   if (!jp) {
     setStatus("日本語が入力されていません");
     return;
@@ -77,10 +78,9 @@ translateBtn.addEventListener("click", async () => {
 
   const en = await fetchTranslation(jp);
 
-  // レベル別に加工（あなたの仕様に合わせて簡易的に分岐）
-  enTextJunior3.value = en;     // 中3レベル
-  enTextSenior.value = en;      // 高校レベル
-  enTextNative.value = en;      // ネイティブレベル
+  enTextJunior3.value = en;
+  enTextSenior.value = en;
+  enTextNative.value = en;
 
   setStatus("翻訳完了");
 });
@@ -127,8 +127,7 @@ saveBtn.addEventListener("click", () => {
   div.textContent = text;
 
   div.addEventListener("click", () => {
-    enTextNative.value = text;
-    setStatus("保存した英文をネイティブ欄に反映しました");
+    div.classList.toggle("selected");
   });
 
   savedList.appendChild(div);
@@ -150,10 +149,24 @@ loadBtn.addEventListener("click", () => {
 });
 
 // ===============================
+// ネイティブ欄に反映
+// ===============================
+applySavedBtn.addEventListener("click", () => {
+  const selected = savedList.querySelector(".saved-item.selected");
+  if (!selected) {
+    setStatus("選択された英文がありません");
+    return;
+  }
+
+  enTextNative.value = selected.textContent;
+  setStatus("保存した英文をネイティブ欄に反映しました");
+});
+
+// ===============================
 // 新しい学習
 // ===============================
 newLessonBtn.addEventListener("click", () => {
-  jpTextArea.value = "";
+  jpText.value = "";
   enTextJunior3.value = "";
   enTextSenior.value = "";
   enTextNative.value = "";

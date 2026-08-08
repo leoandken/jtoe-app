@@ -53,6 +53,16 @@ textarea {
   resize: vertical;
 }
 
+.explain-box {
+  display: none;
+  margin-top: 6px;
+  padding: 6px;
+  background: #f8f8ff;
+  border-left: 4px solid #88a;
+  font-size: 0.9em;
+  white-space: normal;
+}
+
 .btn {
   display: inline-block;
   padding: 10px 14px;

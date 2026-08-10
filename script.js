@@ -38,19 +38,20 @@ function setStatus(msg) {
 // ===============================
 // 翻訳API呼び出し
 // ===============================
-async function fetchExplanation(level, text) {
+async function fetchTranslation(text) {
   const res = await fetch(GAS_API_URL, {
     method: "POST",
-    body: JSON.stringify({ level, text })
+    headers: { "Content-Type": "application/json" },   // ★ 追加
+    body: JSON.stringify({ text })
   });
   const data = await res.json();
+  return data.translated;
 
   // ★ レベル別英文を反映
-  if (level === "junior3") enTextJunior3.value = data.english;
-  if (level === "senior")  enTextSenior.value  = data.english;
-  if (level === "native")  enTextNative.value  = data.english;
+  //if (level === "junior3") enTextJunior3.value = data.english;
+  //if (level === "senior")  enTextSenior.value  = data.english;
+  //if (level === "native")  enTextNative.value  = data.english;
 
-  return data.explanation;
 }
 
 

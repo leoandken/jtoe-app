@@ -48,9 +48,9 @@ async function fetchTranslation(text) {
   return data.translated;
 
   // ★ レベル別英文を反映
-  //if (level === "junior3") enTextJunior3.value = data.english;
-  //if (level === "senior")  enTextSenior.value  = data.english;
-  //if (level === "native")  enTextNative.value  = data.english;
+  if (level === "junior3") enTextJunior3.value = data.english;
+  if (level === "senior")  enTextSenior.value  = data.english;
+  if (level === "native")  enTextNative.value  = data.english;
 
 }
 

@@ -26,7 +26,7 @@ const applySavedBtn = document.getElementById("applySavedBtn");  // ★ 追加
 const statusBox = document.getElementById("status");  // ★ 修正
 
 // GAS API URL
-const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzMRxtdih0mYEcv1bDbYS_byGG6rw78RWXrIm1VR3HXJ3fsx8qqFbs2cRjsDsEnVOhr/exec";
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx56dgh7tzUi3I9BmkSWNSkvJX4t0wbPDZrE0usxyG2QzRKEUUvzBRfM4EpmaMe8iViIg/exec";
 
 // ===============================
 // 状態表示
@@ -38,14 +38,21 @@ function setStatus(msg) {
 // ===============================
 // 翻訳API呼び出し
 // ===============================
-async function fetchTranslation(text) {
+async function fetchExplanation(level, text) {
   const res = await fetch(GAS_API_URL, {
     method: "POST",
-    body: JSON.stringify({ text })
+    body: JSON.stringify({ level, text })
   });
   const data = await res.json();
-  return data.translated;
+
+  // ★ レベル別英文を反映
+  if (level === "junior3") enTextJunior3.value = data.english;
+  if (level === "senior")  enTextSenior.value  = data.english;
+  if (level === "native")  enTextNative.value  = data.english;
+
+  return data.explanation;
 }
+
 
 // ===============================
 // 文法解説API呼び出し

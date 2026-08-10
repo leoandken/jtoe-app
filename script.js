@@ -193,7 +193,7 @@ newLessonBtn.addEventListener("click", () => {
 chkJunior3.addEventListener("change", async () => {
   if (chkJunior3.checked) {
     explainJunior3.style.display = "block";
-    explainJunior3.textContent = await fetchExplanation("junior3", enTextJunior3.value);
+    explainJunior3.textContent = await fetchExplanation("junior3", jpText.value);
   } else {
     explainJunior3.style.display = "none";
   }
@@ -202,7 +202,7 @@ chkJunior3.addEventListener("change", async () => {
 chkSenior.addEventListener("change", async () => {
   if (chkSenior.checked) {
     explainSenior.style.display = "block";
-    explainSenior.textContent = await fetchExplanation("senior", enTextSenior.value);
+    explainSenior.textContent = await fetchExplanation("senior", jpText.value);
   } else {
     explainSenior.style.display = "none";
   }
@@ -211,8 +211,9 @@ chkSenior.addEventListener("change", async () => {
 chkNative.addEventListener("change", async () => {
   if (chkNative.checked) {
     explainNative.style.display = "block";
-    explainNative.textContent = await fetchExplanation("native", enTextNative.value);
+    explainNative.textContent = await fetchExplanation("native", jpText.value);
   } else {
     explainNative.style.display = "none";
   }
 });
+

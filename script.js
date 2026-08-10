@@ -41,17 +41,11 @@ function setStatus(msg) {
 async function fetchTranslation(text) {
   const res = await fetch(GAS_API_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },   // ★ 追加
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ text })
   });
   const data = await res.json();
   return data.translated;
-
-  // ★ レベル別英文を反映
-  if (level === "junior3") enTextJunior3.value = data.english;
-  if (level === "senior")  enTextSenior.value  = data.english;
-  if (level === "native")  enTextNative.value  = data.english;
-
 }
 
 
@@ -61,11 +55,14 @@ async function fetchTranslation(text) {
 async function fetchExplanation(level, text) {
   const res = await fetch(GAS_API_URL, {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ level, text })
   });
+
   const data = await res.json();
   return data.explanation;
 }
+
 
 // ===============================
 // 翻訳ボタン

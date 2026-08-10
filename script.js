@@ -26,7 +26,7 @@ const applySavedBtn = document.getElementById("applySavedBtn");  // ★ 追加
 const statusBox = document.getElementById("status");  // ★ 修正
 
 // GAS API URL
-const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzxyEXLAyWQyy0s5g2fwiePuwnAZDIx8rMUcxAx7qb1FcDRpw7kWDPn5RwHBoiTmzb_/exec";
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycby6Js3o8Qyy3FqC1EbvsshxxtOd_FHPlTSrBoRp0b8KWN4UILQouCtjTMafOfmvLETLWg/exec";
 
 // ===============================
 // 状態表示

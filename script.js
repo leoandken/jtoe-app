@@ -37,7 +37,7 @@ const recognition = new SpeechRecognition();
 
 recognition.lang = "ja-JP";
 recognition.interimResults = false;
-recognition.continuous = false;
+recognition.continuous = true;
 
 // マイクボタン取得
 const recordBtn = document.getElementById("recordBtn");

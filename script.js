@@ -1,7 +1,7 @@
 // ===============================
 // DOM取得
 // ===============================
-const jpText = document.getElementById("jpText");   // ★ 修正
+const jpText = document.getElementById("jpText");
 const enTextJunior3 = document.getElementById("enTextJunior3");
 const enTextSenior = document.getElementById("enTextSenior");
 const enTextNative = document.getElementById("enTextNative");
@@ -21,12 +21,59 @@ const speakBtn = document.getElementById("speakBtn");
 const saveBtn = document.getElementById("saveBtn");
 const loadBtn = document.getElementById("loadBtn");
 const newLessonBtn = document.getElementById("newLessonBtn");
-const applySavedBtn = document.getElementById("applySavedBtn");  // ★ 追加
+const applySavedBtn = document.getElementById("applySavedBtn");
 
-const statusBox = document.getElementById("status");  // ★ 修正
+const statusBox = document.getElementById("status");
 
-// GAS API URL
-const GAS_API_URL = "https://script.google.com/macros/s/AKfycby6Js3o8Qyy3FqC1EbvsshxxtOd_FHPlTSrBoRp0b8KWN4UILQouCtjTMafOfmvLETLWg/exec";
+// Cloud Functions API URL
+const GAS_API_URL = "https://us-central1-project-0790da10-0c9e-48ec-9e8.cloudfunctions.net/speechApp";
+
+// ===============================
+// 音声認識（日本語）
+// ===============================
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const recognition = new SpeechRecognition();
+
+recognition.lang = "ja-JP";
+recognition.interimResults = false;
+recognition.continuous = false;
+
+// マイクボタン取得
+const recordBtn = document.getElementById("recordBtn");
+const stopRecordBtn = document.getElementById("stopRecordBtn");
+
+// 音声認識開始
+recordBtn.addEventListener("click", () => {
+  setStatus("日本語を聞き取っています…");
+  recognition.start();
+});
+
+// 音声認識停止
+stopRecordBtn.addEventListener("click", () => {
+  recognition.stop();
+  setStatus("録音を停止しました");
+});
+
+// 音声認識結果
+recognition.onresult = (event) => {
+  const text = event.results[0][0].transcript;
+  jpText.value = text;
+  setStatus("日本語を認識しました");
+};
+
+// 音声認識終了
+recognition.onend = () => {
+  setStatus("音声認識を終了しました");
+};
+
+// 音声認識エラー
+recognition.onerror = (event) => {
+  console.error(event.error);
+  setStatus("音声認識エラー: " + event.error);
+};
+
+
+
 
 // ===============================
 // 状態表示
@@ -48,7 +95,6 @@ async function fetchTranslation(text) {
   return data.translated;
 }
 
-
 // ===============================
 // 文法解説API呼び出し
 // ===============================
@@ -58,17 +104,15 @@ async function fetchExplanation(level, text) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ level, text })
   });
-
   const data = await res.json();
   return data.explanation;
 }
-
 
 // ===============================
 // 翻訳ボタン
 // ===============================
 translateBtn.addEventListener("click", async () => {
-  const jp = jpText.value.trim();   // ★ 修正
+  const jp = jpText.value.trim();
   if (!jp) {
     setStatus("日本語が入力されていません");
     return;
@@ -137,7 +181,8 @@ saveBtn.addEventListener("click", () => {
 });
 
 // ===============================
-// 呼び出し（保存リスト表示）
+// 呼び出し
+// ===============================
 loadBtn.addEventListener("click", () => {
   if (savedList.children.length === 0) {
     setStatus("保存された英文はありません");
@@ -186,12 +231,12 @@ newLessonBtn.addEventListener("click", () => {
 });
 
 // ===============================
-// 文法解説（チェックONで表示）
+// 文法解説
 // ===============================
 chkJunior3.addEventListener("change", async () => {
   if (chkJunior3.checked) {
     explainJunior3.style.display = "block";
-    explainJunior3.textContent = await fetchExplanation("junior3", jpText.value);
+    explainJunior3.textContent = await fetchExplanation("junior3", enTextJunior3.value);
   } else {
     explainJunior3.style.display = "none";
   }
@@ -200,7 +245,7 @@ chkJunior3.addEventListener("change", async () => {
 chkSenior.addEventListener("change", async () => {
   if (chkSenior.checked) {
     explainSenior.style.display = "block";
-    explainSenior.textContent = await fetchExplanation("senior", jpText.value);
+    explainSenior.textContent = await fetchExplanation("senior", enTextSenior.value);
   } else {
     explainSenior.style.display = "none";
   }
@@ -209,7 +254,7 @@ chkSenior.addEventListener("change", async () => {
 chkNative.addEventListener("change", async () => {
   if (chkNative.checked) {
     explainNative.style.display = "block";
-    explainNative.textContent = await fetchExplanation("native", jpText.value);
+    explainNative.textContent = await fetchExplanation("native", enTextNative.value);
   } else {
     explainNative.style.display = "none";
   }

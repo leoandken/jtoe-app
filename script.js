@@ -88,11 +88,15 @@ async function fetchTranslation(text) {
   const res = await fetch(GAS_API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text })
+    body: JSON.stringify({ text, level: "junior3" })
   });
   const data = await res.json();
   return data.translated;
 }
+
+
+
+
 
 // ===============================
 // 文法解説API呼び出し

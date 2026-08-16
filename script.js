@@ -28,6 +28,7 @@ const statusBox = document.getElementById("status");
 // Cloud Functions API URL
 const GAS_API_URL = "https://us-central1-project-0790da10-0c9e-48ec-9e8.cloudfunctions.net/speechApp";
 
+
 // ===============================
 // 音声認識（日本語）
 // ===============================
@@ -71,8 +72,6 @@ recognition.onerror = (event) => {
   console.error(event.error);
   setStatus("音声認識エラー: " + event.error);
 };
-
-
 
 
 // ===============================

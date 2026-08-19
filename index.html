@@ -1,73 +1,118 @@
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>Rakusupi</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>らくらく 英語スピーチの元づくり</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app-container">
-    <h1>らくらく 英語スピーチの元づくり</h1>
 
-    <section class="block">
-      <button id="recordBtn" class="btn primary">🎤 日本語を話す</button>
-      <button id="stopRecordBtn" class="btn danger">⏹ 録音停止</button>
-      <button id="saveBtn" class="btn secondary">💾 保存</button>
-      <button id="loadBtn" class="btn secondary">📂 呼び出し</button>
+    <div class="app-container">
 
-      <div class="row">
-        <div id="savedList" class="saved-list"></div>
+        <!-- 1番目のブロック: アプリタイトル -->
+        <header class="block block-1">
+            <h1>らくらく 英語スピーチの元づくり</h1>
+        </header>
 
-        <button id="applySavedBtn" class="btn secondary">➡ ネイティブ欄に反映</button>
-        <button id="newLessonBtn" class="btn danger">🆕 新しい学習</button>
-      </div>
+        <!-- 2番目のブロック: 操作ボタン -->
+        <section class="block block-2">
+            <button id="btnRecord" class="btn btn-primary">録音</button>
+            <button id="btnStop" class="btn btn-secondary" disabled>停止</button>
+            <button id="btnNew" class="btn">新規作成</button>
+            <button id="btnSettings" class="btn">設定</button>
+        </section>
 
-      <textarea id="jpText" rows="4"></textarea>
-    </section>
+        <!-- 3番目のブロック: 日本語ボックス -->
+        <section class="block block-3">
+            <textarea id="jaInput" placeholder="ここに日本語を入力するか、録音ボタンを押して話してください..."></textarea>
+        </section>
 
-    <section class="block">
-      <button id="translateBtn" class="btn secondary">🔁 英語に翻訳</button>
+        <!-- 4番目のブロック: 翻訳実行ボタン -->
+        <section class="block block-4">
+            <button id="btnTranslate" class="btn btn-action">英語にする</button>
+        </section>
 
-      <!-- 中学3年レベル -->
-      <div class="row">
-        <label class="label">中学3年レベル（英検3級）</label>
-        <input type="checkbox" id="chkJunior3"> 再生
-      </div>
-      <textarea id="enTextJunior3" rows="3"></textarea>
-      <div id="explainJunior3" class="explain-box"></div>
+        <!-- 5番目のブロック: 中学生レベル -->
+        <section class="block block-5 card">
+            <div class="card-header">
+                <h2>中学生レベル</h2>
+                <div class="card-actions">
+                    <button class="btn btn-select" data-level="junior">選択</button>
+                    <button class="btn btn-save" data-level="junior">保存</button>
+                </div>
+            </div>
+            <textarea id="enJunior" class="en-box" readonly placeholder="中学生レベル（英検3級相当）の英文がここに表示されます"></textarea>
+            <div id="explainJunior" class="explain-box hidden"></div>
+        </section>
 
-      <!-- 高校レベル -->
-      <div class="row">
-        <label class="label">高校生レベル（英検2級）</label>
-        <input type="checkbox" id="chkSenior"> 再生
-      </div>
-      <textarea id="enTextSenior" rows="3"></textarea>
-      <div id="explainSenior" class="explain-box"></div>
+        <!-- 6番目のブロック: 高校生レベル -->
+        <section class="block block-6 card">
+            <div class="card-header">
+                <h2>高校生レベル</h2>
+                <div class="card-actions">
+                    <button class="btn btn-select" data-level="senior">選択</button>
+                    <button class="btn btn-save" data-level="senior">保存</button>
+                </div>
+            </div>
+            <textarea id="enSenior" class="en-box" readonly placeholder="高校生レベル（英検2級相当）の英文がここに表示されます"></textarea>
+            <div id="explainSenior" class="explain-box hidden"></div>
+        </section>
 
-      <!-- ネイティブレベル -->
-      <div class="row">
-        <label class="label">一般（ネイティブレベル）</label>
-        <input type="checkbox" id="chkNative"> 再生
-      </div>
-      <textarea id="enTextNative" rows="3"></textarea>
-      <div id="explainNative" class="explain-box"></div>
+        <!-- 7番目のブロック: ネイティブレベル -->
+        <section class="block block-7 card">
+            <div class="card-header">
+                <h2>ネイティブレベル</h2>
+                <div class="card-actions">
+                    <button class="btn btn-select" data-level="native">選択</button>
+                    <button class="btn btn-save" data-level="native">保存</button>
+                </div>
+            </div>
+            <textarea id="enNative" class="en-box" readonly placeholder="ネイティブレベルの自然な英文がここに表示されます"></textarea>
+            <div id="explainNative" class="explain-box hidden"></div>
+        </section>
 
-    </section>
+        <!-- 8番目のブロック: 音声再生コントロール -->
+        <section class="block block-8">
+            <button id="btnPlay" class="btn btn-play">再生</button>
+            <div class="speed-control">
+                <label for="speedRange">スピード: <span id="speedValue">100</span>%</label>
+                <input type="range" id="speedRange" min="60" max="160" value="100" step="5">
+            </div>
+        </section>
 
-    <section class="block">
-      <button id="speakBtn" class="btn primary">🔊 英語を再生</button>
-      <div class="slider-row">
-        <label for="speedSlider" class="label-inline">再生スピード</label>
-        <input type="range" id="speedSlider" min="60" max="150" value="100">
-        <span id="speedValue">100%</span>
-      </div>
-    </section>
+        <!-- 9番目のブロック: 保存英文管理 -->
+        <section class="block block-9">
+            <div class="saved-actions">
+                <button id="btnLoadSaved" class="btn">呼出</button>
+                <button id="btnDeleteSaved" class="btn btn-danger">削除</button>
+            </div>
+            <div id="savedContainer" class="saved-container hidden">
+                <ul id="savedList" class="saved-list"></ul>
+            </div>
+        </section>
 
-    <section class="block">
-      <div id="status" class="status"></div>
-    </section>
-  </div>
+    </div>
 
-  <script src="script.js"></script>
+    <!-- 設定モーダル (APIキーおよび音声オプション設定用) -->
+    <div id="settingsModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>設定</h3>
+            <div class="form-group">
+                <label for="apiKeyInput">Gemini API Key:</label>
+                <input type="password" id="apiKeyInput" placeholder="APIキーを入力">
+                <small>※未入力の場合はデモデータで動作します</small>
+            </div>
+            <div class="form-group">
+                <label for="voiceSelect">音声タイプ (標準OS音声):</label>
+                <select id="voiceSelect"></select>
+            </div>
+            <div class="modal-actions">
+                <button id="btnSaveSettings" class="btn btn-primary">保存して閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

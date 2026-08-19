@@ -1,264 +1,324 @@
-// ===============================
-// DOM取得
-// ===============================
-const jpText = document.getElementById("jpText");
-const enTextJunior3 = document.getElementById("enTextJunior3");
-const enTextSenior = document.getElementById("enTextSenior");
-const enTextNative = document.getElementById("enTextNative");
+document.addEventListener('DOMContentLoaded', () => {
+    // --- 要素取得 ---
+    const btnRecord = document.getElementById('btnRecord');
+    const btnStop = document.getElementById('btnStop');
+    const btnNew = document.getElementById('btnNew');
+    const btnSettings = document.getElementById('btnSettings');
+    const btnTranslate = document.getElementById('btnTranslate');
+    const jaInput = document.getElementById('jaInput');
 
-const chkJunior3 = document.getElementById("chkJunior3");
-const chkSenior = document.getElementById("chkSenior");
-const chkNative = document.getElementById("chkNative");
+    const btnPlay = document.getElementById('btnPlay');
+    const speedRange = document.getElementById('speedRange');
+    const speedValue = document.getElementById('speedValue');
 
-const explainJunior3 = document.getElementById("explainJunior3");
-const explainSenior = document.getElementById("explainSenior");
-const explainNative = document.getElementById("explainNative");
+    const btnLoadSaved = document.getElementById('btnLoadSaved');
+    const btnDeleteSaved = document.getElementById('btnDeleteSaved');
+    const savedContainer = document.getElementById('savedContainer');
+    const savedList = document.getElementById('savedList');
 
-const savedList = document.getElementById("savedList");
+    const settingsModal = document.getElementById('settingsModal');
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const voiceSelect = document.getElementById('voiceSelect');
+    const btnSaveSettings = document.getElementById('btnSaveSettings');
 
-const translateBtn = document.getElementById("translateBtn");
-const speakBtn = document.getElementById("speakBtn");
-const saveBtn = document.getElementById("saveBtn");
-const loadBtn = document.getElementById("loadBtn");
-const newLessonBtn = document.getElementById("newLessonBtn");
-const applySavedBtn = document.getElementById("applySavedBtn");
+    // 翻訳レベルカード
+    const levels = {
+        junior: {
+            box: document.getElementById('enJunior'),
+            explain: document.getElementById('explainJunior'),
+            card: document.querySelector('.block-5')
+        },
+        senior: {
+            box: document.getElementById('enSenior'),
+            explain: document.getElementById('explainSenior'),
+            card: document.querySelector('.block-6')
+        },
+        native: {
+            box: document.getElementById('enNative'),
+            explain: document.getElementById('explainNative'),
+            card: document.querySelector('.block-7')
+        }
+    };
 
-const statusBox = document.getElementById("status");
+    let selectedLevel = null;
+    let selectedSavedIndex = null;
+    let recognition = null;
+    let apiKey = localStorage.getItem('gemini_api_key') || '';
 
-// Cloud Functions API URL
-const GAS_API_URL = "https://us-central1-project-0790da10-0c9e-48ec-9e8.cloudfunctions.net/speechApp";
+    if (apiKey) apiKeyInput.value = apiKey;
 
+    // --- 音声認識 (SpeechRecognition) ---
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'ja-JP';
+        recognition.continuous = true;
+        recognition.interimResults = true;
 
-// ===============================
-// 音声認識（日本語）
-// ===============================
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-const recognition = new SpeechRecognition();
+        recognition.onresult = (event) => {
+            let transcript = '';
+            for (let i = 0; i < event.results.length; i++) {
+                transcript += event.results[i][0].transcript;
+            }
+            jaInput.value = transcript;
+        };
 
-recognition.lang = "ja-JP";
-recognition.interimResults = false;
-recognition.continuous = true;
+        recognition.onerror = (e) => console.error('音声認識エラー:', e);
+    } else {
+        btnRecord.disabled = true;
+        btnRecord.title = 'お使いのブラウザは音声認識に対応していません';
+    }
 
-// マイクボタン取得
-const recordBtn = document.getElementById("recordBtn");
-const stopRecordBtn = document.getElementById("stopRecordBtn");
+    btnRecord.addEventListener('click', () => {
+        if (!recognition) return;
+        recognition.start();
+        btnRecord.disabled = true;
+        btnStop.disabled = false;
+        btnRecord.classList.add('btn-danger');
+    });
 
-// 音声認識開始
-recordBtn.addEventListener("click", () => {
-  setStatus("日本語を聞き取っています…");
-  recognition.start();
-});
+    btnStop.addEventListener('click', () => {
+        if (!recognition) return;
+        recognition.stop();
+        btnRecord.disabled = false;
+        btnStop.disabled = true;
+        btnRecord.classList.remove('btn-danger');
+    });
 
-// 音声認識停止
-stopRecordBtn.addEventListener("click", () => {
-  recognition.stop();
-  setStatus("録音を停止しました");
-});
+    btnNew.addEventListener('click', () => {
+        jaInput.value = '';
+        Object.values(levels).forEach(l => {
+            l.box.value = '';
+            l.explain.textContent = '';
+            l.explain.classList.add('hidden');
+        });
+        deselectAll();
+    });
 
-// 音声認識結果
-recognition.onresult = (event) => {
-  const text = event.results[0][0].transcript;
-  jpText.value = text;
-  setStatus("日本語を認識しました");
-};
+    // --- 選択ボタン・アコーディオン切り替え ---
+    document.querySelectorAll('.btn-select').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const levelKey = e.target.getAttribute('data-level');
+            
+            if (selectedLevel === levelKey) {
+                deselectAll();
+            } else {
+                deselectAll();
+                selectedLevel = levelKey;
+                e.target.textContent = '解除';
+                e.target.classList.add('active');
+                levels[levelKey].card.classList.add('selected');
+                levels[levelKey].explain.classList.remove('hidden');
+            }
+        });
+    });
 
-// 音声認識終了
-recognition.onend = () => {
-  setStatus("音声認識を終了しました");
-};
+    function deselectAll() {
+        selectedLevel = null;
+        document.querySelectorAll('.btn-select').forEach(b => {
+            b.textContent = '選択';
+            b.classList.remove('active');
+        });
+        Object.values(levels).forEach(l => {
+            l.card.classList.remove('selected');
+            l.explain.classList.add('hidden');
+        });
+    }
 
-// 音声認識エラー
-recognition.onerror = (event) => {
-  console.error(event.error);
-  setStatus("音声認識エラー: " + event.error);
-};
+    // --- 翻訳ロジック (最新 Gemini 3.6 Flash API 対応) ---
+    btnTranslate.addEventListener('click', async () => {
+        const text = jaInput.value.trim();
+        if (!text) {
+            alert('日本語テキストを入力するか、録音してください。');
+            return;
+        }
 
+        btnTranslate.disabled = true;
+        btnTranslate.textContent = '翻訳中...';
 
-// ===============================
-// 状態表示
-// ===============================
-function setStatus(msg) {
-  statusBox.textContent = msg;
-}
+        try {
+            if (apiKey) {
+                await fetchGeminiTranslation(text);
+            } else {
+                await applyDemoData();
+            }
+        } catch (err) {
+            alert(`翻訳処理に失敗しました。\n詳細: ${err.message}`);
+            console.error(err);
+        } finally {
+            btnTranslate.disabled = false;
+            btnTranslate.textContent = '英語にする';
+        }
+    });
 
-// ===============================
-// 翻訳API呼び出し
-// ===============================
-async function fetchTranslation(text) {
-  const res = await fetch(GAS_API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text, level: "junior3" })
-  });
-  const data = await res.json();
-  return data.translated;
-}
+    async function fetchGeminiTranslation(text) {
+        // モデル名を gemini-3.6-flash に更新
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
+        
+        const prompt = `以下の日本語文を3種類のレベルの英文に翻訳し、各解説を付けて、指定のJSON形式のみで出力してください（Markdownの記法等は不要です）。
 
+日本語: "${text}"
 
+JSONフォーマット例:
+{
+  "junior": { "text": "中学生レベルの英文", "explain": "ポイント解説" },
+  "senior": { "text": "高校生レベルの英文", "explain": "ポイント解説" },
+  "native": { "text": "ネイティブレベルの英文", "explain": "ポイント解説" }
+}`;
 
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { responseMimeType: "application/json" }
+            })
+        });
 
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.error?.message || `通信エラー (HTTP ${response.status})`);
+        }
 
-// ===============================
-// 文法解説API呼び出し
-// ===============================
-async function fetchExplanation(level, text) {
-  const res = await fetch(GAS_API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ level, text })
-  });
-  const data = await res.json();
-  return data.explanation;
-}
+        const data = await response.json();
+        const resultText = data.candidates[0].content.parts[0].text;
+        const res = JSON.parse(resultText);
 
-// ===============================
-// 翻訳ボタン
-// ===============================
-translateBtn.addEventListener("click", async () => {
-  const jp = jpText.value.trim();
-  if (!jp) {
-    setStatus("日本語が入力されていません");
-    return;
-  }
+        levels.junior.box.value = res.junior.text;
+        levels.junior.explain.textContent = res.junior.explain;
 
-  setStatus("翻訳中…");
+        levels.senior.box.value = res.senior.text;
+        levels.senior.explain.textContent = res.senior.explain;
 
-  const en = await fetchTranslation(jp);
+        levels.native.box.value = res.native.text;
+        levels.native.explain.textContent = res.native.explain;
+    }
 
-  enTextJunior3.value = en;
-  enTextSenior.value = en;
-  enTextNative.value = en;
+    function applyDemoData() {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                levels.junior.box.value = "When I think of great progressive rock bands, I choose Yes and Pink Floyd. I think Close to the Edge is the best album by Yes, and The Dark Side of the Moon is by Pink Floyd. Both sound new even now. By the way, I have records of both bands.";
+                levels.junior.explain.textContent = "ポイント解説\n・雄 (great bands): 単純で伝わりやすい great bands を採用。\n・代表作 (best album): 最上級 the best album を使用。\n・今聞いても新しい (sound new even now): sound + 形容詞で表現。";
 
-  setStatus("翻訳完了");
-});
+                levels.senior.box.value = "Speaking of leading progressive rock bands, I would mention Yes and Pink Floyd. I believe Close to the Edge is Yes's masterpiece, while The Dark Side of the Moon is Pink Floyd's. Both still sound innovative today. Incidentally, I own vinyl records of both artists.";
+                levels.senior.explain.textContent = "ポイント解説\n・〜といえば (Speaking of...): 自然な分詞構文。\n・代表作 (masterpiece): 英検2級レベル語彙。\n・新しい (innovative): 革新的というニュアンス。";
 
-// ===============================
-// 音声再生
-// ===============================
-speakBtn.addEventListener("click", () => {
-  let text = "";
+                levels.native.box.value = "When it comes to progressive rock giants, Yes and Pink Floyd immediately come to mind. For me, Yes’s definitive album is Close to the Edge, and Pink Floyd’s is The Dark Side of the Moon. Both still sound incredibly fresh today. By the way, I actually own both on vinyl.";
+                levels.native.explain.textContent = "ポイント解説\n・雄 (giants): 巨匠・雄を表す自然な表現。\n・代表作 (definitive album): 決定盤という意味の表現。\n・レコードを持っている (own both on vinyl): 現代の自然な口語表現。";
 
-  if (chkJunior3.checked) text = enTextJunior3.value;
-  if (chkSenior.checked) text = enTextSenior.value;
-  if (chkNative.checked) text = enTextNative.value;
+                resolve();
+            }, 600);
+        });
+    }
 
-  if (!text) {
-    setStatus("再生する英文がありません");
-    return;
-  }
+    // --- 音声合成 (SpeechSynthesis) ---
+    let voices = [];
+    function populateVoices() {
+        voices = speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'));
+        voiceSelect.innerHTML = '';
+        voices.forEach((v, index) => {
+            const opt = document.createElement('option');
+            opt.value = index;
+            opt.textContent = `${v.name} (${v.lang})`;
+            voiceSelect.appendChild(opt);
+        });
+    }
 
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = "en-US";
-  speechSynthesis.speak(utter);
+    speechSynthesis.onvoiceschanged = populateVoices;
+    populateVoices();
 
-  setStatus("英語を再生しました");
-});
+    speedRange.addEventListener('input', (e) => {
+        speedValue.textContent = e.target.value;
+    });
 
-// ===============================
-// 保存
-// ===============================
-saveBtn.addEventListener("click", () => {
-  let text = "";
+    btnPlay.addEventListener('click', () => {
+        if (!selectedLevel) {
+            alert('再生する英文のレベルを選択（「選択」ボタンを押す）してください。');
+            return;
+        }
 
-  if (chkJunior3.checked) text = enTextJunior3.value;
-  if (chkSenior.checked) text = enTextSenior.value;
-  if (chkNative.checked) text = enTextNative.value;
+        const text = levels[selectedLevel].box.value;
+        if (!text) return;
 
-  if (!text) {
-    setStatus("保存する英文がありません");
-    return;
-  }
+        speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = parseFloat(speedRange.value) / 100;
 
-  const div = document.createElement("div");
-  div.className = "saved-item";
-  div.textContent = text;
+        if (voices.length > 0 && voiceSelect.value) {
+            utterance.voice = voices[voiceSelect.value];
+        }
 
-  div.addEventListener("click", () => {
-    div.classList.toggle("selected");
-  });
+        speechSynthesis.speak(utterance);
+    });
 
-  savedList.appendChild(div);
-  savedList.style.display = "block";
+    // --- 保存・呼出・削除機能 ---
+    document.querySelectorAll('.btn-save').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const levelKey = e.target.getAttribute('data-level');
+            const text = levels[levelKey].box.value;
+            if (!text) {
+                alert('保存する英文がありません。');
+                return;
+            }
 
-  setStatus("英文を保存しました");
-});
+            const savedItems = JSON.parse(localStorage.getItem('saved_speeches') || '[]');
+            savedItems.push({
+                text: text,
+                level: levelKey,
+                date: new Date().toLocaleString('ja-JP')
+            });
+            localStorage.setItem('saved_speeches', JSON.stringify(savedItems));
+            alert('英文を保存しました。');
+            renderSavedList();
+        });
+    });
 
-// ===============================
-// 呼び出し
-// ===============================
-loadBtn.addEventListener("click", () => {
-  if (savedList.children.length === 0) {
-    setStatus("保存された英文はありません");
-    return;
-  }
+    btnLoadSaved.addEventListener('click', () => {
+        savedContainer.classList.toggle('hidden');
+        renderSavedList();
+    });
 
-  savedList.style.display = "block";
-  setStatus("保存した英文を表示しています");
-});
+    function renderSavedList() {
+        savedList.innerHTML = '';
+        const savedItems = JSON.parse(localStorage.getItem('saved_speeches') || '[]');
+        
+        savedItems.forEach((item, index) => {
+            const li = document.createElement('li');
+            li.textContent = `[${item.level}] ${item.text.substring(0, 40)}... (${item.date})`;
+            
+            li.addEventListener('click', () => {
+                document.querySelectorAll('#savedList li').forEach(el => el.classList.remove('selected'));
+                li.classList.add('selected');
+                selectedSavedIndex = index;
+            });
 
-// ===============================
-// ネイティブ欄に反映
-// ===============================
-applySavedBtn.addEventListener("click", () => {
-  const selected = savedList.querySelector(".saved-item.selected");
-  if (!selected) {
-    setStatus("選択された英文がありません");
-    return;
-  }
+            li.addEventListener('dblclick', () => {
+                levels.native.box.value = item.text;
+                alert('ネイティブレベルのボックスに読み込みました。');
+            });
 
-  enTextNative.value = selected.textContent;
-  setStatus("保存した英文をネイティブ欄に反映しました");
-});
+            savedList.appendChild(li);
+        });
+    }
 
-// ===============================
-// 新しい学習
-// ===============================
-newLessonBtn.addEventListener("click", () => {
-  jpText.value = "";
-  enTextJunior3.value = "";
-  enTextSenior.value = "";
-  enTextNative.value = "";
+    btnDeleteSaved.addEventListener('click', () => {
+        if (selectedSavedIndex === null) {
+            alert('削除する項目を一覧から選択（ワンクリック）してください。');
+            return;
+        }
 
-  chkJunior3.checked = false;
-  chkSenior.checked = false;
-  chkNative.checked = false;
+        let savedItems = JSON.parse(localStorage.getItem('saved_speeches') || '[]');
+        savedItems.splice(selectedSavedIndex, 1);
+        localStorage.setItem('saved_speeches', JSON.stringify(savedItems));
+        selectedSavedIndex = null;
+        renderSavedList();
+    });
 
-  savedList.innerHTML = "";
-  savedList.style.display = "none";
-
-  explainJunior3.style.display = "none";
-  explainSenior.style.display = "none";
-  explainNative.style.display = "none";
-
-  setStatus("新しい学習を開始しました（すべて初期化）");
-});
-
-// ===============================
-// 文法解説
-// ===============================
-chkJunior3.addEventListener("change", async () => {
-  if (chkJunior3.checked) {
-    explainJunior3.style.display = "block";
-    explainJunior3.textContent = await fetchExplanation("junior3", enTextJunior3.value);
-  } else {
-    explainJunior3.style.display = "none";
-  }
-});
-
-chkSenior.addEventListener("change", async () => {
-  if (chkSenior.checked) {
-    explainSenior.style.display = "block";
-    explainSenior.textContent = await fetchExplanation("senior", enTextSenior.value);
-  } else {
-    explainSenior.style.display = "none";
-  }
-});
-
-chkNative.addEventListener("change", async () => {
-  if (chkNative.checked) {
-    explainNative.style.display = "block";
-    explainNative.textContent = await fetchExplanation("native", enTextNative.value);
-  } else {
-    explainNative.style.display = "none";
-  }
+    // --- 設定モーダル ---
+    btnSettings.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+    btnSaveSettings.addEventListener('click', () => {
+        apiKey = apiKeyInput.value.trim();
+        localStorage.setItem('gemini_api_key', apiKey);
+        settingsModal.classList.add('hidden');
+    });
 });
